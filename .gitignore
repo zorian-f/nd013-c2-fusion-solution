@@ -3,4 +3,4 @@ venv_project/
 *.pyc
 *.cfg
 *.pth
-
+*.pkl
