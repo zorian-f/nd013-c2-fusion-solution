@@ -1,8 +1,13 @@
+wheel
+
 numpy
 opencv-python
 protobuf
 easydict
-pytorch
+
+#pytorch
+torch
+
 pillow
 matplotlib
 wxpython

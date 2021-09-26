@@ -1,0 +1,6 @@
+**/venv_project
+venv_project/
+*.pyc
+*.cfg
+*.pth
+
