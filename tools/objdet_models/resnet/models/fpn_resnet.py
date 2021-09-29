@@ -205,6 +205,8 @@ class PoseResNet(nn.Module):
 
             ret[head] = final_out
 
+        print(ret)
+
         return ret
 
     def apply_kfpn(self, outs):

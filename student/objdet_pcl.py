@@ -87,8 +87,8 @@ def show_range_image(frame, lidar_name):
     # print(ri_range.shape)
 
     # step 3 : set values <0 to zero
-    ri_range[ri_range<0]=0.0
-    ri_intensity[ri_intensity<0]=0.0
+    ri_range[ri_range < 0] = 0.0
+    ri_intensity[ri_intensity < 0] = 0.0
 
     # step 4 : map the range channel onto an 8-bit scale and make sure that the full range of values is appropriately considered
     ri_range = ri_range * 255 / (np.amax(ri_range) - np.amin(ri_range)) 
@@ -99,6 +99,7 @@ def show_range_image(frame, lidar_name):
 
     # print(f"p1 {p1} p99 {p99}")
 
+    ri_intensity = np.clip(ri_intensity, p1, p99) - p1
     ri_intensity = ri_intensity * 255 / (p99 - p1)
 
     # step 6 : stack the range and intensity image vertically using np.vstack and convert the result to an unsigned 8-bit integer

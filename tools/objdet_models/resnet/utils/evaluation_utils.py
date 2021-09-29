@@ -78,6 +78,11 @@ def decode(hm_cen, cen_offset, direction, z_coor, dim, K=40):
 
     hm_cen = _nms(hm_cen)
     scores, inds, clses, ys, xs = _topk(hm_cen, K=K)
+
+    print(scores)
+    print(inds)
+    print(len(scores[0]))
+
     if cen_offset is not None:
         cen_offset = _transpose_and_gather_feat(cen_offset, inds)
         cen_offset = cen_offset.view(batch_size, K, 2)

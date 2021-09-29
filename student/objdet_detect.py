@@ -11,6 +11,7 @@
 #
 
 # general package imports
+import cv2
 import numpy as np
 import torch
 from easydict import EasyDict as edict
@@ -25,6 +26,7 @@ sys.path.append(os.path.normpath(os.path.join(SCRIPT_DIR, PACKAGE_PARENT)))
 # model-related
 from tools.objdet_models.resnet.models import fpn_resnet
 from tools.objdet_models.resnet.utils.evaluation_utils import decode, post_processing 
+import tools.objdet_models.resnet.utils.torch_utils as torch_utils
 
 from tools.objdet_models.darknet.models.darknet2pytorch import Darknet as darknet
 from tools.objdet_models.darknet.utils.evaluation_utils import post_processing_v2
@@ -65,25 +67,13 @@ def load_configs_model(model_name='darknet', configs=None):
         configs.model_path = os.path.join(parent_path, 'tools', 'objdet_models', 'resnet')
         configs.pretrained_filename = os.path.join(configs.model_path, 'pretrained', 'fpn_resnet_18_epoch_300.pth')
         configs.arch = 'fpn_resnet'
-
         configs.conf_thresh = 0.5
-
         configs.batch_size = 4
-
-
         configs.num_layers = 18
-        # configs.heads
-        # configs.head_conv
-        # configs.imagenet_pretrained
-
         configs.pin_memory = True
         configs.distributed = False
-
         configs.input_size = (608, 608)
-        configs.hm_size = (152, 152)
         configs.down_ratio = 4
-        configs.max_objects = 50
-
         configs.imagenet_pretrained = False
         configs.head_conv = 64
         configs.num_classes = 3
@@ -91,7 +81,6 @@ def load_configs_model(model_name='darknet', configs=None):
         configs.num_z = 1
         configs.num_dim = 3
         configs.num_direction = 2
-
         configs.heads = {
             'hm_cen': configs.num_classes,
             'cen_offset': configs.num_center_offset,
@@ -99,6 +88,10 @@ def load_configs_model(model_name='darknet', configs=None):
             'z_coor': configs.num_z,
             'dim': configs.num_dim
         }
+
+        configs.hm_size = (152, 152)
+        configs.down_ratio = 4
+        configs.max_objects = 50
         configs.num_input_features = 4
 
         #######
@@ -153,7 +146,7 @@ def create_model(configs):
     
     elif 'fpn_resnet' in configs.arch:
         print('using ResNet architecture with feature pyramid')
-        
+
         ####### ID_S3_EX1-4 START #######     
         #######
         print("student task ID_S3_EX1-4")
@@ -204,30 +197,76 @@ def detect_objects(input_bev_maps, model, configs):
 
         elif 'fpn_resnet' in configs.arch:
             # decode output and perform post-processing
-            
+
             ####### ID_S3_EX1-5 START #######     
             #######
             print("student task ID_S3_EX1-5")
 
+            # im = input_bev_maps.cpu().numpy().astype(np.float32)
+            # print(im.shape)
+            # im = np.transpose(im[0,:,:,:], axes=(1, 2, 0))
+            # print(im.shape)
+            # cv2.imshow('input_bev_maps', (im * 255).astype(np.uint8))
+            # cv2.waitKey(0)
+
+            hm_cen = outputs["hm_cen"]
+            cen_offset = outputs["cen_offset"]
+            direction = outputs["direction"]
+            z_coor = outputs["z_coor"]
+            dim = outputs["dim"]
+
+            hm_cen = torch_utils._sigmoid(hm_cen)
+            cen_offset = torch_utils._sigmoid(cen_offset)
+
+            detections = decode(hm_cen, cen_offset, direction, z_coor, dim, K=configs.max_objects)
+            detections = detections.cpu().numpy().astype(np.float32)
+
+            print(detections)
+
+            detections = post_processing(detections, configs)
+
+            detections = detections[0][1]
+
             #######
             ####### ID_S3_EX1-5 END #######     
 
-            
 
     ####### ID_S3_EX2 START #######     
     #######
     # Extract 3d bounding boxes from model response
     print("student task ID_S3_EX2")
     objects = [] 
+    
+    print(detections)
 
     ## step 1 : check whether there are any detections
+    if len(detections) > 0:
+        bound_size_x = configs.lim_x[1] - configs.lim_x[0]
+        bound_size_y = configs.lim_y[1] - configs.lim_y[0]
 
         ## step 2 : loop over all detections
+        for detection in detections:
         
             ## step 3 : perform the conversion using the limits for x, y and z set in the configs structure
-        
+            score, x, y, z, h, w, l, yaw = detection
+            yaw *= -1
+
+            x = y / configs.bev_height * bound_size_x + configs.lim_x[0]
+            y = x / configs.bev_width * bound_size_y + configs.lim_y[0]
+            z = z + configs.lim_z[0]
+            w = w / configs.bev_width * bound_size_y
+            l = l / configs.bev_height * bound_size_x
+
             ## step 4 : append the current object to the 'objects' array
-        
+            objects.append([1, x, y, z, h, w, l, yaw])
+
+            # objects.append([1, 1.0, 0.0, 5.0, 1.0, 1.0, 1.0, 0.0])
+    
+    else:
+        print("No Objects")
+
+    print(objects)
+
     #######
     ####### ID_S3_EX2 START #######   
     
