@@ -94,6 +94,7 @@ def load_configs_model(model_name='darknet', configs=None):
         configs.max_objects = 50
         configs.num_input_features = 4
 
+        # mentor suggestion config values
         configs.arch = 'fpn_resnet'
         configs.saved_fn = 'fpn_resnet'
         configs.pretrained_path = 'tools/objdet_models/resnet/pretrained/fpn_resnet_18_epoch_300.pth'
