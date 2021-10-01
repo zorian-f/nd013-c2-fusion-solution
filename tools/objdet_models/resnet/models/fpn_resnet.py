@@ -205,7 +205,7 @@ class PoseResNet(nn.Module):
 
             ret[head] = final_out
 
-        print(ret)
+        # print(ret)
 
         return ret
 

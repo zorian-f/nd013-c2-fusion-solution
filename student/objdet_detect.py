@@ -241,6 +241,10 @@ def detect_objects(input_bev_maps, model, configs):
             # im = np.transpose(im[0,:,:,:], axes=(1, 2, 0))
             # print(im.shape)
             # cv2.imshow('input_bev_maps', (im * 255).astype(np.uint8))
+            # cv2.imshow('input_bev_i_maps', (im[:,:,0] * 255).astype(np.uint8))
+            # cv2.imshow('input_bev_h_maps', (im[:,:,1] * 255).astype(np.uint8))
+            # cv2.imshow('input_bev_d_maps', (im[:,:,2] * 255).astype(np.uint8))
+
             # cv2.waitKey(0)
 
             hm_cen = outputs["hm_cen"]
@@ -255,7 +259,7 @@ def detect_objects(input_bev_maps, model, configs):
             detections = decode(hm_cen, cen_offset, direction, z_coor, dim, K=configs.max_objects)
             detections = detections.cpu().numpy().astype(np.float32)
 
-            print(detections)
+            # print(detections)
 
             detections = post_processing(detections, configs)
 
@@ -271,35 +275,34 @@ def detect_objects(input_bev_maps, model, configs):
     print("student task ID_S3_EX2")
     objects = [] 
     
-    print(detections)
+    # print(detections)
 
     ## step 1 : check whether there are any detections
     if len(detections) > 0:
         bound_size_x = configs.lim_x[1] - configs.lim_x[0]
         bound_size_y = configs.lim_y[1] - configs.lim_y[0]
 
-        ## step 2 : loop over all detections
         for detection in detections:
-        
+            score, bev_x, bev_y, z, h, bev_w, bev_l, yaw = detection
+
+            ## step 2 : loop over all detections
+            x = bev_y / configs.bev_height * bound_size_x
+            y = bev_x / configs.bev_width * bound_size_y - bound_size_y/2.0 
+            w = bev_w / configs.bev_width * bound_size_y 
+            l = bev_l / configs.bev_height * bound_size_x
+
             ## step 3 : perform the conversion using the limits for x, y and z set in the configs structure
-            score, x, y, z, h, w, l, yaw = detection
-            yaw *= -1
-
-            x = y / configs.bev_height * bound_size_x + configs.lim_x[0]
-            y = x / configs.bev_width * bound_size_y + configs.lim_y[0]
-            z = z + configs.lim_z[0]
-            w = w / configs.bev_width * bound_size_y
-            l = l / configs.bev_height * bound_size_x
-
-            ## step 4 : append the current object to the 'objects' array
-            objects.append([1, x, y, z, h, w, l, yaw])
-
-            # objects.append([1, 1.0, 0.0, 5.0, 1.0, 1.0, 1.0, 0.0])
+            if ((x >= configs.lim_x[0]) and (x <= configs.lim_x[1])
+                and (y >= configs.lim_y[0]) and (y <= configs.lim_y[1])
+                and (z >= configs.lim_z[0]) and (z <= configs.lim_z[1])):
+                
+                ## step 4 : append the current object to the 'objects' array
+                objects.append([1, x, y, z, h, w, l, yaw])
     
     else:
         print("No Objects")
 
-    print(objects)
+    # print(objects)
 
     #######
     ####### ID_S3_EX2 START #######   
