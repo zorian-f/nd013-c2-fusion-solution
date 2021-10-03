@@ -157,8 +157,6 @@ def bev_from_pcl(lidar_pcl, configs):
     intensity_map = np.zeros((configs.bev_height + 1, configs.bev_width + 1))
 
     # step 2 : re-arrange elements in lidar_pcl_cpy by sorting first by x, then y, then -z (use numpy.lexsort)
-    lidar_pcl_cpy[lidar_pcl_cpy[:,3] < 0.0, 3] = 0.0
-    lidar_pcl_cpy[lidar_pcl_cpy[:,3] > 1.0, 3] = 1.0
     idx_intensity = np.lexsort((-lidar_pcl_cpy[:, 3], lidar_pcl_cpy[:, 1], lidar_pcl_cpy[:, 0]))
     lidar_pcl_cpy = lidar_pcl_cpy[idx_intensity]
 
@@ -170,11 +168,12 @@ def bev_from_pcl(lidar_pcl, configs):
     ## step 4 : assign the intensity value of each unique entry in lidar_top_pcl to the intensity map 
     ##          make sure that the intensity is scaled in such a way that objects of interest (e.g. vehicles) are clearly visible    
     ##          also, make sure that the influence of outliers is mitigated by normalizing intensity on the difference between the max. and min. value within the point cloud
-    
+
     p1 = np.percentile(lidar_pcl_int[:, 3], 1.0)
     p99 = np.percentile(lidar_pcl_int[:, 3], 99.0)
+
     # print(f"p1 {p1} p99 {p99}")
-    intensity_map[np.int_(lidar_pcl_int[:, 0]), np.int_(lidar_pcl_int[:, 1])] = lidar_pcl_int[:, 3] / (p99 - p1)
+    intensity_map[np.int_(lidar_pcl_int[:, 0]), np.int_(lidar_pcl_int[:, 1])] = np.clip(lidar_pcl_int[:, 3] / (p99 - p1), 0, 1)
 
     ## step 5 : temporarily visualize the intensity map using OpenCV to make sure that vehicles separate well from the background
     if False:
