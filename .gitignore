@@ -1,6 +1,8 @@
 **/dataset
 **/results
+**/results_mid
 *.pyc
 *.cfg
 *.pth
 *.pkl
+*.png

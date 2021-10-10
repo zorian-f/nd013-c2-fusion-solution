@@ -55,7 +55,11 @@ class Sensor:
         ############ 
              
     def get_hx(self, x):    
-        # calculate nonlinear measurement expectation value h(x)   
+        # calculate nonlinear measurement expectation value h(x)
+
+
+        print("3",x)
+
         if self.name == 'lidar':
             pos_veh = np.ones((4, 1)) # homogeneous coordinates
             pos_veh[0:3] = x[0:3] 

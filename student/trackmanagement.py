@@ -35,25 +35,54 @@ class Track:
         # - initialize track state and track score with appropriate values
         ############
 
-        self.x = np.matrix([[49.53980697],
-                        [ 3.41006279],
-                        [ 0.91790581],
-                        [ 0.        ],
-                        [ 0.        ],
-                        [ 0.        ]])
-        self.P = np.matrix([[9.0e-02, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00],
-                        [0.0e+00, 9.0e-02, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00],
-                        [0.0e+00, 0.0e+00, 6.4e-03, 0.0e+00, 0.0e+00, 0.0e+00],
-                        [0.0e+00, 0.0e+00, 0.0e+00, 2.5e+03, 0.0e+00, 0.0e+00],
-                        [0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 2.5e+03, 0.0e+00],
-                        [0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 2.5e+01]])
-        self.state = 'confirmed'
-        self.score = 0
+        # self.x = np.matrix([[49.53980697],
+        #                 [ 3.41006279],
+        #                 [ 0.91790581],
+        #                 [ 0.        ],
+        #                 [ 0.        ],
+        #                 [ 0.        ]])
+        # self.P = np.matrix([[9.0e-02, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00],
+        #                 [0.0e+00, 9.0e-02, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00],
+        #                 [0.0e+00, 0.0e+00, 6.4e-03, 0.0e+00, 0.0e+00, 0.0e+00],
+        #                 [0.0e+00, 0.0e+00, 0.0e+00, 2.5e+03, 0.0e+00, 0.0e+00],
+        #                 [0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 2.5e+03, 0.0e+00],
+        #                 [0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 2.5e+01]])
+        # self.state = 'confirmed'
+        # self.score = 0
         
+        pos_sens = np.ones((4, 1))
+        pos_sens[0:3] = meas.z[0:3]
+        pos_veh = meas.sensor.sens_to_veh * pos_sens
+        
+        x = np.zeros((6, 1))
+        x[0:3] = pos_veh[0:3]
+        self.set_x(x)
+
+        print("1", self.x)
+
+        P_pos = M_rot * meas.R * M_rot.transpose()
+
+        sigma_p44 = params.sigma_p44
+        sigma_p55 = params.sigma_p55 
+        sigma_p66 = params.sigma_p66 
+        P_vel = np.matrix([
+            [sigma_p44**2, 0, 0],
+            [0, sigma_p55**2, 0],
+            [0, 0, sigma_p66**2]])
+
+        # overall covariance initialization
+        P = np.zeros((6, 6))
+        P[0:3, 0:3] = P_pos
+        P[3:6, 3:6] = P_vel
+        self.set_P(P)
+
+        self.state = 'initialized'
+        self.score = 1.0 / params.window
+
         ############
         # END student code
         ############ 
-               
+
         # other track attributes
         self.id = id
         self.width = meas.width
@@ -81,7 +110,6 @@ class Track:
             M_rot = meas.sensor.sens_to_veh
             self.yaw = np.arccos(M_rot[0,0]*np.cos(meas.yaw) + M_rot[0,1]*np.sin(meas.yaw)) # transform rotation from sensor to vehicle coordinates
         
-        
 ###################        
 
 class Trackmanagement:
@@ -107,9 +135,21 @@ class Trackmanagement:
             if meas_list: # if not empty
                 if meas_list[0].sensor.in_fov(track.x):
                     # your code goes here
-                    pass 
+                    track.score -= 1.0 / params.window
 
-        # delete old tracks   
+        # delete old tracks
+        for track in self.track_list:
+            delete = False
+            if track.score < params.delete_threshold and track.state == "confirmed":
+                delete = True
+
+            px = track.P[0,0]
+            py = track.P[1,1]
+            if px > params.max_P or py > params.max_P:
+                delete = True
+
+            if delete:
+                self.delete_track(track)
 
         ############
         # END student code
@@ -140,7 +180,14 @@ class Trackmanagement:
         # - set track state to 'tentative' or 'confirmed'
         ############
 
-        pass
+        print(track.score)
+
+        track.score += 1.0 / params.window
+
+        if track.score >= params.confirmed_threshold:
+            track.state = "confirmed"
+        else:
+            track.state = "tentative"
         
         ############
         # END student code
