@@ -27,7 +27,7 @@ class Track:
     def __init__(self, meas, id):
         print('creating track no.', id)
         M_rot = meas.sensor.sens_to_veh[0:3, 0:3] # rotation matrix from sensor to vehicle coordinates
-        
+
         ############
         # TODO Step 2: initialization:
         # - replace fixed track initialization values by initialization of x and P based on 
@@ -49,7 +49,7 @@ class Track:
         #                 [0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 2.5e+01]])
         # self.state = 'confirmed'
         # self.score = 0
-        
+
         pos_sens = np.ones((4, 1))
         pos_sens[0:3] = meas.z[0:3]
         pos_veh = meas.sensor.sens_to_veh * pos_sens
@@ -57,8 +57,6 @@ class Track:
         x = np.zeros((6, 1))
         x[0:3] = pos_veh[0:3]
         self.set_x(x)
-
-        print("1", self.x)
 
         P_pos = M_rot * meas.R * M_rot.transpose()
 

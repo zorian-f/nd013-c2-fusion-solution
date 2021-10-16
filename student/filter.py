@@ -80,18 +80,12 @@ class Filter:
         # print(F)
         # print(track.x)
         
-        # print("1.25", track.x)
-
-
         x = F * track.x
 
         P = F * track.P * F.transpose() + self.Q()
         
         track.set_x(x)
         track.set_P(P)
-        
-        # print("1.5", track.x)
-        # print("1.5.1", x)
 
         ############
         # END student code
@@ -124,8 +118,6 @@ class Filter:
         ############
         # TODO Step 1: calculate and return residual gamma
         ############
-
-        print("2", track.x)
 
         gamma = meas.z - meas.sensor.get_hx(track.x)
 
