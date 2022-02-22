@@ -15,6 +15,7 @@ import cv2
 import numpy as np
 import torch
 import open3d as o3d
+import zlib
 
 # add project directory to python path to enable relative imports
 import os
@@ -74,18 +75,32 @@ def show_range_image(frame, lidar_name):
     print("student task ID_S1_EX1")
 
     # step 1 : extract lidar data and range image for the roof-mounted lidar
-    
+    lidar = [obj for obj in frame.lasers if obj.name == lidar_name][0] # get laser data structure from frame
+    ri = []
+    if len(lidar.ri_return1.range_image_compressed) > 0: # use first response
+        ri = dataset_pb2.MatrixFloat()
+        ri.ParseFromString(zlib.decompress(lidar.ri_return1.range_image_compressed))
+        ri = np.array(ri.data).reshape(ri.shape.dims)
     # step 2 : extract the range and the intensity channel from the range image
-    
+    ri_intensity = ri[:,:,[0,1]]
     # step 3 : set values <0 to zero
-    
+    ri_intensity[ri_intensity<0]=0
     # step 4 : map the range channel onto an 8-bit scale and make sure that the full range of values is appropriately considered
-    
-    # step 5 : map the intensity channel onto an 8-bit scale and normalize with the difference between the 1- and 99-percentile to mitigate the influence of outliers
-    
+    ri_intensity[:,:,0] *= 255 / (np.amax(ri_intensity[:,:,0]) - np.amin(ri_intensity[:,:,0])) 
+    # step 5 : map the intensity channel onto an 8-bit scale and normalize with the difference between the 1- and 99-percentile to mitigate the influence of outliers    
+    perecentile99 = np.percentile(ri_intensity[:,:,1], 99)
+    perecentile1 = np.percentile(ri_intensity[:,:,1], 1)
+
+    idx_limit = ri_intensity[:,:,1] > perecentile99
+    ri_intensity[idx_limit,1] = perecentile99
+
+    idx_limit = ri_intensity[:,:,1] < perecentile1
+    ri_intensity[idx_limit,1] = perecentile1
+
+    ri_intensity[:,:,1] *= 255 / (perecentile99 - perecentile1)
+
     # step 6 : stack the range and intensity image vertically using np.vstack and convert the result to an unsigned 8-bit integer
-    
-    img_range_intensity = [] # remove after implementing all steps
+    img_range_intensity = ri_intensity
     #######
     ####### ID_S1_EX1 END #######     
     
