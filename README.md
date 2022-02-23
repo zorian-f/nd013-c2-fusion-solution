@@ -1,3 +1,15 @@
+# Visualize range image channels (ID_S1_EX1)
+The Following Tasks were done:
+	
+* Convert range image “range” channel to 8bit
+* Convert range image “intensity” channel to 8bit
+* Crop range image to +/- 90 deg. left and right of the forward-facing x-axis
+* Stack cropped range and intensity image vertically and visualize the result using OpenCV
+
+<p float="left" align="middle" width="99%" >
+  <img src="img/img_range.png" width="99%"/>
+</p>
+
 # Visualize point-cloud (ID_S1_EX2)
 As part of this exercise, cars in the Piontcloud are identified to analyse which features are stable. If we have a look at the Pictures below we can identify the following features to be stable:
 * Windows
