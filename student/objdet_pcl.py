@@ -104,7 +104,7 @@ def show_range_image(frame, lidar_name):
     ri_center = int(ri_intensity.shape[1]/2)
     ri_intensity = ri_intensity[:,ri_center-deg45:ri_center+deg45,:]
     # step 6 : stack the range and intensity image vertically using np.vstack and convert the result to an unsigned 8-bit integer
-    img_range_intensity = ri_intensity
+    img_range_intensity = np.vstack((ri_intensity[:,:,0], ri_intensity[:,:,1]))
     #######
     ####### ID_S1_EX1 END #######     
     
