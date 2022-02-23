@@ -173,7 +173,8 @@ while True:
         if 'show_range_image' in exec_list:
             img_range = pcl.show_range_image(frame, lidar_name)
             img_range = img_range.astype(np.uint8)
-            cv2.imshow('range_image', img_range[:,:,0])
+            cv2.imshow('range_image', img_range)
+            cv2.imwrite('/data/range_image.png', img_range)
             cv2.waitKey(vis_pause_time)
 
         if 'show_pcl' in exec_list:
