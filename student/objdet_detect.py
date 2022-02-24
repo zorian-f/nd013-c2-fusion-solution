@@ -57,6 +57,7 @@ def load_configs_model(model_name='darknet', configs=None):
         configs.num_workers = 4
         configs.pin_memory = True
         configs.use_giou_loss = False
+        configs.min_iou = 0.5
 
     elif model_name == 'fpn_resnet':
         ####### ID_S3_EX1-3 START #######     
@@ -94,6 +95,7 @@ def load_configs_model(model_name='darknet', configs=None):
         configs.heads = {'hm_cen': configs.num_classes, 'cen_offset': configs.num_center_offset, 'direction': configs.num_direction, 'z_coor': configs.num_z,'dim': configs.num_dim}
         configs.num_input_features = 4
         configs.num_layers = 18
+        configs.min_iou = 0.5
         #######
         ####### ID_S3_EX1-3 END #######     
 
@@ -217,10 +219,9 @@ def detect_objects(input_bev_maps, model, configs):
     #######
     # Extract 3d bounding boxes from model response
     print("student task ID_S3_EX2")
-    objects = [] 
-
+    objects = []
     ## step 1 : check whether there are any detections
-    if detections.size > 0:
+    if len(detections):
         for obj in detections:
             id, bev_x, bev_y, z, h, bev_w, bev_l, yaw = obj
 
