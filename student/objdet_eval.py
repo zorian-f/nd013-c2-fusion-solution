@@ -59,12 +59,12 @@ def measure_detection_performance(detections, labels, labels_valid, min_iou=0.5)
             for d in detections:
                 ## step 3 : extract the four corners of the current detection
 
-                d_x = d[1].numpy()
-                d_y = d[2].numpy()
+                d_x = d[1]
+                d_y = d[2]
                 d_z = d[3]
-                d_w = d[5].numpy()
-                d_l = d[6].numpy()
-                d_yaw = d[7].numpy()
+                d_w = d[5]
+                d_l = d[6]
+                d_yaw = d[7]
 
                 d_fl, d_rl, d_rr, d_fr = tools.compute_box_corners(d_x, d_y, d_w, d_l, d_yaw)
                 ## step 4 : computer the center distance between label and detection bounding-box in x, y, and z
