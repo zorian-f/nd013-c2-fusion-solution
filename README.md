@@ -1,4 +1,13 @@
-# Visualize range image channels (ID_S1_EX1)
+# SDCND : Sensor Fusion and Tracking
+
+Write a short recap of the four tracking steps and what you implemented there (EKF, track management, data association, camera-lidar sensor fusion). Which results did you achieve? Which part of the project was most difficult for you to complete, and why?
+Do you see any benefits in camera-lidar fusion compared to lidar-only tracking (in theory and in your concrete results)?
+Which challenges will a sensor fusion system face in real-life scenarios? Did you see any of these challenges in the project?
+Can you think of ways to improve your tracking results in the future?
+
+# Midterm Project
+This Section belongs to the Midterm project
+## Visualize range image channels (ID_S1_EX1)
 The Following Tasks were done:
 	
 * Convert range image “range” channel to 8bit
@@ -10,7 +19,7 @@ The Following Tasks were done:
   <img src="img/img_range.png" width="99%"/>
 </p>
 
-# Visualize point-cloud (ID_S1_EX2)
+## Visualize point-cloud (ID_S1_EX2)
 As part of this exercise, cars in the Piontcloud are identified to analyse which features are stable. If we have a look at the Pictures below we can identify the following features to be stable:
 * Windows
 * Overall shape of the Vehicle (e. g. roof- and hoodline)
