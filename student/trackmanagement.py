@@ -34,21 +34,32 @@ class Track:
         # unassigned measurement transformed from sensor to vehicle coordinates
         # - initialize track state and track score with appropriate values
         ############
-
-        self.x = np.matrix([[49.53980697],
+        '''
+        test = np.matrix([[49.53980697],
                         [ 3.41006279],
                         [ 0.91790581],
                         [ 0.        ],
                         [ 0.        ],
                         [ 0.        ]])
-        self.P = np.matrix([[9.0e-02, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00],
-                        [0.0e+00, 9.0e-02, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00],
-                        [0.0e+00, 0.0e+00, 6.4e-03, 0.0e+00, 0.0e+00, 0.0e+00],
-                        [0.0e+00, 0.0e+00, 0.0e+00, 2.5e+03, 0.0e+00, 0.0e+00],
-                        [0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 2.5e+03, 0.0e+00],
-                        [0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 2.5e+01]])
-        self.state = 'confirmed'
-        self.score = 0
+        '''
+        P_p = M_rot * meas.R * np.transpose(M_rot)
+        
+        self.P = np.matrix([[P_p[0, 0], 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00],
+                        [0.0e+00, P_p[1, 1], 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00],
+                        [0.0e+00, 0.0e+00, P_p[2, 2], 0.0e+00, 0.0e+00, 0.0e+00],
+                        [0.0e+00, 0.0e+00, 0.0e+00, params.sigma_p44**2, 0.0e+00, 0.0e+00],
+                        [0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, params.sigma_p55**2, 0.0e+00],
+                        [0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, params.sigma_p66**2]])
+        
+        self.x = np.zeros((params.dim_state, 1))
+        z = np.matrix([meas.z[0],
+                     meas.z[1],
+                     meas.z[2],
+                     [1]])
+                      
+        self.x[0:3] = (meas.sensor.sens_to_veh*z)[0:3]
+        self.state = 'initialized'
+        self.score = 1./params.window
         
         ############
         # END student code
@@ -106,10 +117,11 @@ class Trackmanagement:
             # check visibility    
             if meas_list: # if not empty
                 if meas_list[0].sensor.in_fov(track.x):
-                    # your code goes here
-                    pass 
-
-        # delete old tracks   
+                    track.score -= 1./params.window                    
+            if  (track.score <= params.delete_threshold and track.state == 'confirmed') or \
+                (track.score <= 0.2 and track.state == 'tentative') or \
+                (track.P[0,0]>params.max_P or track.P[0,0]>params.max_P):
+                self.delete_track(track)
 
         ############
         # END student code
@@ -139,7 +151,14 @@ class Trackmanagement:
         # - increase track score
         # - set track state to 'tentative' or 'confirmed'
         ############
-
+        track.score += 1./ params.window
+        if track.score > 1.0:
+            track.score = 1.0           
+        
+        if track.state == 'tentative' and track.score >= params.confirmed_threshold:
+            track.state = 'confirmed'
+        elif track.state == 'initialized' and track.score >= 0.4:
+            track.state = 'tentative'
         pass
         
         ############
