@@ -37,15 +37,27 @@ class Association:
         # - replace association_matrix with the actual association matrix based on Mahalanobis distance (see below) for all tracks and all measurements
         # - update list of unassigned measurements and unassigned tracks
         ############
-        N = len(track_list) # N tracks
-        M = len(meas_list) # M measurements
+        
+        N = len(track_list)
+        M = len(meas_list)
+        
+        '''
         self.unassigned_tracks = list(range(N))
         self.unassigned_meas = list(range(M))
 
-        # initialize association matrix
-        self.association_matrix = np.inf*np.ones((N,M)) 
-
-        # loop over all tracks and all measurements to set up association matrix
+        self.association_matrix = np.inf * np.ones((N,M))
+        '''
+        self.association_matrix = np.matrix([]) # reset matrix
+        self.unassigned_tracks = [] # reset lists
+        self.unassigned_meas = []
+        
+        if len(meas_list) > 0:
+            self.unassigned_meas = list(range(M))
+        if len(track_list) > 0:
+            self.unassigned_tracks = list(range(N))
+        if len(meas_list) > 0 and len(track_list) > 0: 
+            self.association_matrix = np.asmatrix(np.inf * np.ones((N,M)))
+            
         for i in range(N): 
             track = track_list[i]
             for j in range(M):
@@ -100,7 +112,12 @@ class Association:
         # TODO Step 3: return True if measurement lies inside gate, otherwise False
         ############
         # check if measurement lies inside gate
-        limit = chi2.ppf(params.gating_threshold, df=2)
+        if sensor.name == 'lidar':
+            df = 2
+        else:
+            df = 1
+            
+        limit = chi2.ppf(params.gating_threshold, df)
         if MHD < limit:
             return True
         else:
@@ -114,7 +131,7 @@ class Association:
         # TODO Step 3: calculate and return Mahalanobis distance
         ############
         gamma = KF.gamma(track, meas)
-        MHD = np.transpose(gamma)*np.linalg.inv(KF.S(track, meas, meas.sensor.get_H(track.x)))*gamma
+        MHD = np.sqrt(np.transpose(gamma)*np.linalg.inv(KF.S(track, meas, meas.sensor.get_H(track.x)))*gamma)
         return MHD       
         ############
         # END student code
