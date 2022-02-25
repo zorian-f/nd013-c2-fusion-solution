@@ -58,7 +58,7 @@ class Track:
                       
         self.x[0:3] = (meas.sensor.sens_to_veh*z)[0:3]
         self.state = 'initialized'
-        self.score = 1./params.window
+        self.score = 1.0/params.window
         
         ############
         # END student code
@@ -114,11 +114,18 @@ class Trackmanagement:
         for i in unassigned_tracks:
             track = self.track_list[i]
             # check visibility    
-            if meas_list: # if not empty
-                if meas_list[0].sensor.in_fov(track.x):
-                    track.score -= 1./params.window                    
+            if meas_list:
+                if meas_list[0].sensor.in_fov(track.x): # if not empty
+                    # your code goes here
+                    track.score -= (1.0 / params.window)
+            else: # reduce score when no measurements are available
+                track.score -= (1.0 / params.window)
+
+        # delete old tracks   
+        for track in self.track_list:
             if  (track.score <= params.delete_threshold and track.state == 'confirmed') or \
-                (track.score <= 0.2 and track.state == 'tentative') or \
+                (track.score <= 0.3 and track.state == 'tentative') or \
+                track.score < 0 or \
                 (track.P[0,0]>params.max_P or track.P[1,1]>params.max_P):
                 self.delete_track(track)
 
@@ -150,14 +157,14 @@ class Trackmanagement:
         # - increase track score
         # - set track state to 'tentative' or 'confirmed'
         ############
-        track.score += 1./ params.window
-        if track.score > 1.0:
-            track.score = 1.0           
-        if track.state == 'tentative' and track.score >= params.confirmed_threshold:
+        track.score += (1.0 / params.window)
+        if track.score > params.window:
+            track.score = params.window           
+        
+        if (track.state == 'tentative' and track.score >= params.confirmed_threshold):
             track.state = 'confirmed'
-        elif track.state == 'initialized' and track.score >= 0.3:
+        elif (track.state == 'initialized' and track.score >= 0.4):
             track.state = 'tentative'
-        pass
         ############
         # END student code
         ############ 
