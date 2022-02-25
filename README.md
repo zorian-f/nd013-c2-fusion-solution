@@ -33,6 +33,10 @@ Can you think of ways to improve your tracking results in the future?:
   <img src="img/Step4_plot.png" width="99%"/>
 </p>
 
+<p float="left" align="middle" width="99%" >
+  <img src="img/my_tracking_results.gif" width="99%"/>
+</p>
+
 # Midterm Project
 This Section belongs to the Midterm project
 ## Visualize range image channels (ID_S1_EX1)
