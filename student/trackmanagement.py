@@ -43,7 +43,6 @@ class Track:
                         [ 0.        ]])
         '''
         P_p = M_rot * meas.R * np.transpose(M_rot)
-        
         self.P = np.matrix([[P_p[0, 0], 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00],
                         [0.0e+00, P_p[1, 1], 0.0e+00, 0.0e+00, 0.0e+00, 0.0e+00],
                         [0.0e+00, 0.0e+00, P_p[2, 2], 0.0e+00, 0.0e+00, 0.0e+00],
@@ -154,13 +153,11 @@ class Trackmanagement:
         track.score += 1./ params.window
         if track.score > 1.0:
             track.score = 1.0           
-        
         if track.state == 'tentative' and track.score >= params.confirmed_threshold:
             track.state = 'confirmed'
         elif track.state == 'initialized' and track.score >= 0.4:
             track.state = 'tentative'
         pass
-        
         ############
         # END student code
         ############ 
