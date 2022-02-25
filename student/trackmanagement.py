@@ -155,7 +155,7 @@ class Trackmanagement:
             track.score = 1.0           
         if track.state == 'tentative' and track.score >= params.confirmed_threshold:
             track.state = 'confirmed'
-        elif track.state == 'initialized' and track.score >= 0.4:
+        elif track.state == 'initialized' and track.score >= 0.3:
             track.state = 'tentative'
         pass
         ############
