@@ -119,7 +119,7 @@ class Trackmanagement:
                     track.score -= 1./params.window                    
             if  (track.score <= params.delete_threshold and track.state == 'confirmed') or \
                 (track.score <= 0.2 and track.state == 'tentative') or \
-                (track.P[0,0]>params.max_P or track.P[0,0]>params.max_P):
+                (track.P[0,0]>params.max_P or track.P[1,1]>params.max_P):
                 self.delete_track(track)
 
         ############
