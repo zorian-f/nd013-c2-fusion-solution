@@ -10,28 +10,29 @@ Can you think of ways to improve your tracking results in the future?:
 * In rela-Life a big challenge ist to compute in real-Time.
 
 ## Step 1
-
+EKF tracking a single real-world target with lidar measurement input over time:
 <p float="left" align="middle" width="99%" >
   <img src="img/Step1_plot.png" width="99%"/>
 </p>
 
 ## Step 2
-
+Track management to initialize and delete tracks, set a track state and a track score:
 <p float="left" align="middle" width="99%" >
   <img src="img/Step2_plot.png" width="99%"/>
 </p>
 
 ## Step 3
-
-<p float="left" align="middle" width="99%" >
-  <img src="img/Step3_plot.png" width="99%"/>
-</p>
-
-## Step 4
-
+Single nearest neighbor data association to associate measurements to tracks with multi target tracking:
 <p float="left" align="middle" width="99%" >
   <img src="img/Step4_plot.png" width="99%"/>
 </p>
+
+## Step 4
+Added nonlinear camera measurement model:
+<p float="left" align="middle" width="99%" >
+  <img src="img/Step3_plot.png" width="99%"/>
+</p>
+Resulting Video:
 
 <p float="left" align="middle" width="99%" >
   <img src="img/my_tracking_results.gif" width="99%"/>
