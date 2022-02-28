@@ -1,13 +1,18 @@
 # SDCND : Sensor Fusion and Tracking
 
 Write a short recap of the four tracking steps and what you implemented there (EKF, track management, data association, camera-lidar sensor fusion). Which results did you achieve? Which part of the project was most difficult for you to complete, and why?:
-
+* In the EKF Step, i impelented a 3D EKF Filter analogues to the 2D one in the lessons. Because everything is mathematically well described as matrices, going from 2D to 3D is no big Problem. Only the transfer function `F` and the covariance `Q` need some attention.
+* In implementing the track management, on challenge is to find the right heuristics for initializing, deleting und updating the tracks.
+*  Most difficult was to understand how all the different Variables of the EKF play together. Especially to understand the non-linearity of the Camera measurement.
+* In the end the model can successfully track 3 Targets without losing them once, it also deletes ghost-tracks or the ones which are out of sight. 
 
 Do you see any benefits in camera-lidar fusion compared to lidar-only tracking (in theory and in your concrete results)?:
+* The fusion definitive adds complexity if this added complexity is worth the benefist of having, e. g.  redundancy for me is not clear now. As i heard in the lessons, there are companies like Tesla which think Lidar is not needed at all or are even obstructive.
 
 Which challenges will a sensor fusion system face in real-life scenarios? Did you see any of these challenges in the project?
 Can you think of ways to improve your tracking results in the future?:
 * In rela-Life a big challenge ist to compute in real-Time.
+* Tracking can be improved with better associtation algorithm like global nearest neighbor or having some sense of time
 
 ## Step 1
 EKF tracking a single real-world target with lidar measurement input over time:
